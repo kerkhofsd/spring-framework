@@ -2220,6 +2220,22 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
+	public void testLazyInitRespectedByGetBeansOfType() {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		bd1.setLazyInit(true);
+		factory.registerBeanDefinition("tb1", bd1);
+
+		assertThat(((AbstractBeanDefinition) factory.getMergedBeanDefinition("tb1")).getLazyInit()).isEqualTo(Boolean.TRUE);
+
+		factory.preInstantiateSingletons();
+		assertThat(factory.containsSingleton("tb1")).isFalse();
+
+		factory.getBeansOfType(TestBean.class, true, false);
+		assertThat(factory.containsSingleton("tb1")).isFalse();
+	}
+
+	@Test
 	public void testLazyInitFactory() {
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(LazyInitFactory.class));
 		lbf.preInstantiateSingletons();
